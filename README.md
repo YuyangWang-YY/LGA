@@ -299,4 +299,5 @@ LGA/
 ## Team
 
 NYU Center for Urban Science and Progress (CUSP) — Capstone Project (Yuyang Wang, Ruisi Dai, Yijie Tang) 
+
 Sponsor: Port Authority of New York and New Jersey / LaGuardia Airport
