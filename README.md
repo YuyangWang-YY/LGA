@@ -69,7 +69,7 @@ Five trained models are stored in the [`models/`](models/) directory. All classi
 **File:** `models/arrival_delay_classifier_v9.joblib`  
 **Purpose:** Predicts whether an inbound flight will be delayed before it lands at LGA.  
 **Algorithm:** CatBoost Classifier  
-**Performance:** AUC-ROC = 0.808 · Optimal threshold = 0.46 · Training set ≈ 103,000 flights
+**Performance:** AUC-ROC = 0.808 · Optimal threshold = 0.46 · Training set ≈ 103,000 flights · pr_auc = 0.6334 · recall = 0.6539 · precision: 0.707
 
 **Target (Y):**
 - `Is_Delayed` — binary flag (1 = delayed, 0 = on-time)
