@@ -47,12 +47,26 @@ class FlightDetail(FlightSummary):
     operational_context: OperationalContext | None = None
 
 
+class DelayBuckets(BaseModel):
+    """Count of flights in each predicted-delay magnitude band (minutes).
+
+    Computed from pred_delay_q50. Buckets use 15/45/90-minute cut points
+    aligned with the project's DOT delay threshold (15 min) and typical
+    ops escalation points (medium: 15–45, heavy: 45–90, severe: 90+).
+    """
+    bucket_0_15: int
+    bucket_15_45: int
+    bucket_45_90: int
+    bucket_90_plus: int
+
+
 class KPIData(BaseModel):
     predicted_delays: int
     delay_rate: float
     avg_pred_delay: float
     peak_stress_hour: int | None
     total_flights: int
+    delay_buckets: DelayBuckets
 
 
 class TimelineSlot(BaseModel):

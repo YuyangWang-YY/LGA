@@ -21,53 +21,63 @@ DEPARTURE_MODELS = {
     "regression_q50": "departure_delay_regressor_q50_v8.joblib",
 }
 
-# === Arrival Feature Columns (V7.0: 20 features) ===
+# === Arrival Feature Columns (V9.0: 25 = 21 base + 4 engineered) ===
+# Informational only — runtime feature list comes from the model file itself.
 ARRIVAL_FEATURES = [
+    # Base (21) — shared with arrival regressor
     "delay_rate_1h",
     "terminal_delay_1h",
     "severe_delay_count_prev",
     "delay_rolling_3h",
     "lga_dep_delay_1h",
     "prev_aircraft_delay",
+    "turnaround_hours",
     "gate_delay_rate",
     "faa_delay_reason",
     "runway_delay_rate",
     "airline_delay_rate",
     "Hour",
-    "Month",
     "faa_delay_severity",
     "runway_config_change",
     "origin_dewpoint",
-    "origin_storm_flag",
-    "origin_cloud_cover",
     "origin_historical_delay",
+    "origin_wx_impact",
     "route_risk_score",
-    "turnaround_hours",
+    "lga_wx_impact",
+    "faa_event_duration_hours",
+    "faa_active_event_count",
+    # Engineered interaction features (classifier only)
+    "origin_dewpoint_missing",
+    "congestion_x_gate",
+    "chain_x_turnaround",
+    "congestion_accel",
 ]
 
-# === Departure Feature Columns (V7.0: 21 features) ===
+# === Departure Feature Columns (V9.0: 23 features) ===
 DEPARTURE_FEATURES = [
     "delay_rate_1h",
-    "terminal_delay_1h",
-    "severe_delay_count_prev",
     "delay_rolling_3h",
+    "severe_delay_count_prev",
+    "terminal_delay_1h",
+    "dep_runway_config_change",
     "lga_arr_delay_1h",
     "prev_inbound_delay",
-    "gate_delay_rate",
-    "faa_delay_reason",
-    "runway_delay_rate",
-    "airline_delay_rate",
+    "turnaround_hours",
+    "dep_gate_delay_rate",
+    "dep_airline_delay_rate",
+    "dep_runway_delay_rate",
+    "dep_faa_delay_reason",
     "Hour",
     "Month",
     "faa_delay_severity",
-    "runway_config_change",
+    "dest_wx_impact",
+    "lga_wx_impact",
     "dest_dewpoint",
-    "dest_storm_flag",
-    "dest_cloud_cover",
+    "dest_pressure_change_3h",
     "dest_historical_delay",
+    "faa_event_duration_hours",
+    "faa_active_event_count",
     "route_risk_score",
-    "turnaround_hours",
-    "lga_dep_delay_1h",
 ]
 
 # === Operating Mode Thresholds ===
@@ -142,40 +152,63 @@ SHAP_LABELS = {
     # V9 weather impact scores
     "origin_wx_impact": "Origin weather impact score",
     "lga_wx_impact": "LGA weather impact score",
+    "dest_wx_impact": "Destination weather impact score",
+    "dest_pressure_change_3h": "Destination pressure change (3h)",
     "faa_event_duration_hours": "FAA event duration",
     "faa_active_event_count": "Active FAA events",
+    # V9 departure-prefixed features (dep classifier model)
+    "dep_runway_config_change": "Recent departure runway configuration change",
+    "dep_gate_delay_rate": "Departure gate historical delay rate",
+    "dep_airline_delay_rate": "Departure airline delay tendency",
+    "dep_runway_delay_rate": "Departure runway historical delay rate",
+    "dep_faa_delay_reason": "FAA delay reason category (departure)",
 }
 
 # === SHAP Feature → Delay Cause Category ===
 SHAP_CATEGORIES: dict[str, str] = {
-    # Weather (origin/dest)
+    # Weather (origin/dest) — includes V9 composite impact scores
     "origin_dewpoint": "weather",
+    "origin_dewpoint_missing": "weather",
     "origin_storm_flag": "weather",
     "origin_cloud_cover": "weather",
+    "origin_wx_impact": "weather",
     "origin_historical_delay": "weather",
     "dest_dewpoint": "weather",
     "dest_storm_flag": "weather",
     "dest_cloud_cover": "weather",
+    "dest_wx_impact": "weather",
+    "dest_pressure_change_3h": "weather",
     "dest_historical_delay": "weather",
-    # Aircraft Continuity
+    "lga_wx_impact": "weather",
+    # Aircraft Continuity — includes V9 chain×turnaround interaction
     "prev_aircraft_delay": "aircraft",
     "prev_inbound_delay": "aircraft",
     "turnaround_hours": "aircraft",
-    # LGA Cascade (lag features)
+    "chain_x_turnaround": "aircraft",
+    # LGA Cascade (lag features) — includes V9 congestion acceleration
     "delay_rate_1h": "cascade",
     "terminal_delay_1h": "cascade",
     "severe_delay_count_prev": "cascade",
     "delay_rolling_3h": "cascade",
     "lga_dep_delay_1h": "cascade",
     "lga_arr_delay_1h": "cascade",
-    # Route & Operational
+    "congestion_accel": "cascade",
+    # Route & Operational — includes V9 FAA event + dep-prefixed + congestion×gate
     "route_risk_score": "route",
     "gate_delay_rate": "route",
     "runway_delay_rate": "route",
     "airline_delay_rate": "route",
     "faa_delay_reason": "route",
     "faa_delay_severity": "route",
+    "faa_event_duration_hours": "route",
+    "faa_active_event_count": "route",
     "runway_config_change": "route",
+    "dep_runway_config_change": "route",
+    "dep_gate_delay_rate": "route",
+    "dep_airline_delay_rate": "route",
+    "dep_runway_delay_rate": "route",
+    "dep_faa_delay_reason": "route",
+    "congestion_x_gate": "route",
     "Hour": "route",
     "Month": "route",
 }

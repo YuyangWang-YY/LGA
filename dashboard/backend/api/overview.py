@@ -8,6 +8,7 @@ from fastapi import APIRouter, Query
 
 from api.schemas import (
     AirlineDelay,
+    DelayBuckets,
     DelayCause,
     DirectionOverview,
     FAAAdvisory,
@@ -55,6 +56,9 @@ def compute_direction_overview(
             kpi=KPIData(
                 predicted_delays=0, delay_rate=0.0, avg_pred_delay=0.0,
                 peak_stress_hour=None, total_flights=0,
+                delay_buckets=DelayBuckets(
+                    bucket_0_15=0, bucket_15_45=0, bucket_45_90=0, bucket_90_plus=0,
+                ),
             ),
             timeline=[],
             terminal_stress=[],
@@ -80,12 +84,23 @@ def compute_direction_overview(
     else:
         peak_hour = None
 
+    # Delay magnitude buckets (minutes) — drives the Overview "Delay Magnitude" card.
+    # Cut points: 15 (DOT delay threshold), 45 (moderate ops impact), 90 (severe).
+    q50 = flights["pred_delay_q50"]
+    delay_buckets = DelayBuckets(
+        bucket_0_15=int(((q50 > 0) & (q50 < 15)).sum()),
+        bucket_15_45=int(((q50 >= 15) & (q50 < 45)).sum()),
+        bucket_45_90=int(((q50 >= 45) & (q50 < 90)).sum()),
+        bucket_90_plus=int((q50 >= 90).sum()),
+    )
+
     kpi = KPIData(
         predicted_delays=int(pred_delays),
         delay_rate=round(pred_delays / total * 100, 1) if total > 0 else 0.0,
         avg_pred_delay=round(avg_delay, 1),
         peak_stress_hour=peak_hour,
         total_flights=total,
+        delay_buckets=delay_buckets,
     )
 
     # Timeline: use full-day data if available, otherwise windowed data
@@ -431,11 +446,13 @@ async def get_overview(
     arr_overview = compute_direction_overview(arr_flights, window_hours, arr_full_day)
     dep_overview = compute_direction_overview(dep_flights, window_hours, dep_full_day)
 
-    # Top risk flights (combined, sorted by probability, top 8)
+    # Top risk flights (combined, sorted by probability, top 15 — spans
+    # CRITICAL/HIGH and reaches into MEDIUM so stakeholders see the full
+    # near-threshold watchlist under Balanced without switching modes).
     all_flights = pd.concat([arr_flights, dep_flights], ignore_index=True)
     top_risk = (
         all_flights.sort_values("delay_probability", ascending=False)
-        .head(8)
+        .head(15)
     )
     top_risk_summaries = [
         flight_row_to_summary(row) for _, row in top_risk.iterrows()
