@@ -358,6 +358,8 @@ export default function OverviewTab() {
     if (!data) return null;
     if (terminalKey && data.terminal_kpis[terminalKey]) {
       const t = data.terminal_kpis[terminalKey];
+      const ab = t.arrivals.kpi.delay_buckets;
+      const db = t.departures.kpi.delay_buckets;
       return {
         total: t.total_flights,
         arr: t.arr_count,
@@ -368,10 +370,18 @@ export default function OverviewTab() {
         avgPredDelay: t.avg_pred_delay_min,
         highRisk: t.high_risk_count,
         gateConflicts: t.gate_conflict_count,
+        delayBuckets: {
+          bucket_0_15: ab.bucket_0_15 + db.bucket_0_15,
+          bucket_15_45: ab.bucket_15_45 + db.bucket_15_45,
+          bucket_45_90: ab.bucket_45_90 + db.bucket_45_90,
+          bucket_90_plus: ab.bucket_90_plus + db.bucket_90_plus,
+        },
       };
     }
     const arr = data.arrivals;
     const dep = data.departures;
+    const ab = arr.kpi.delay_buckets;
+    const db = dep.kpi.delay_buckets;
     return {
       total: arr.kpi.total_flights + dep.kpi.total_flights,
       arr: arr.kpi.total_flights,
@@ -386,6 +396,12 @@ export default function OverviewTab() {
         dep.risk_distribution.critical +
         dep.risk_distribution.high,
       gateConflicts: data.gate_conflicts.length,
+      delayBuckets: {
+        bucket_0_15: ab.bucket_0_15 + db.bucket_0_15,
+        bucket_15_45: ab.bucket_15_45 + db.bucket_15_45,
+        bucket_45_90: ab.bucket_45_90 + db.bucket_45_90,
+        bucket_90_plus: ab.bucket_90_plus + db.bucket_90_plus,
+      },
     };
   }, [data, terminalKey]);
 
@@ -602,6 +618,42 @@ export default function OverviewTab() {
               }
               accent="amber"
             />
+            {/* Delay Magnitude — 4-bucket severity breakdown of predicted delays (min) */}
+            <div className="flex-1 basis-0 bg-white/[0.03] rounded-xl px-3 py-2.5 ring-1 ring-white/[0.08] flex flex-col justify-center min-w-0 h-full">
+              <div className="flex items-center gap-2 mb-1.5">
+                <Timer className="w-4 h-4 text-zinc-500" />
+                <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-500 truncate">
+                  Delay Magnitude
+                </span>
+              </div>
+              <div className="grid grid-cols-4 gap-1">
+                <div className="flex flex-col items-center bg-emerald-500/10 rounded px-1 py-0.5">
+                  <span className="text-[14px] font-bold font-mono text-emerald-300 leading-none">
+                    {kpiBlock.delayBuckets.bucket_0_15}
+                  </span>
+                  <span className="text-[7px] font-bold uppercase tracking-wider text-emerald-400/70 mt-0.5">0–15</span>
+                </div>
+                <div className="flex flex-col items-center bg-amber-500/10 rounded px-1 py-0.5">
+                  <span className="text-[14px] font-bold font-mono text-amber-300 leading-none">
+                    {kpiBlock.delayBuckets.bucket_15_45}
+                  </span>
+                  <span className="text-[7px] font-bold uppercase tracking-wider text-amber-400/70 mt-0.5">15–45</span>
+                </div>
+                <div className="flex flex-col items-center bg-orange-500/10 rounded px-1 py-0.5">
+                  <span className="text-[14px] font-bold font-mono text-orange-300 leading-none">
+                    {kpiBlock.delayBuckets.bucket_45_90}
+                  </span>
+                  <span className="text-[7px] font-bold uppercase tracking-wider text-orange-400/70 mt-0.5">45–90</span>
+                </div>
+                <div className="flex flex-col items-center bg-rose-500/10 rounded px-1 py-0.5">
+                  <span className="text-[14px] font-bold font-mono text-rose-300 leading-none">
+                    {kpiBlock.delayBuckets.bucket_90_plus}
+                  </span>
+                  <span className="text-[7px] font-bold uppercase tracking-wider text-rose-400/70 mt-0.5">90+</span>
+                </div>
+              </div>
+              <span className="text-[10px] text-zinc-600 mt-1 truncate">predicted delay (min)</span>
+            </div>
           </div>
         </div>
 

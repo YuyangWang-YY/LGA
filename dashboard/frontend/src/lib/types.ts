@@ -51,12 +51,20 @@ export interface FlightDetail extends FlightSummary {
   operational_context: OperationalContext | null;
 }
 
+export interface DelayBuckets {
+  bucket_0_15: number;
+  bucket_15_45: number;
+  bucket_45_90: number;
+  bucket_90_plus: number;
+}
+
 export interface KPIData {
   predicted_delays: number;
   delay_rate: number;
   avg_pred_delay: number;
   peak_stress_hour: number | null;
   total_flights: number;
+  delay_buckets: DelayBuckets;
 }
 
 export interface TimelineSlot {

@@ -1,25 +1,15 @@
 import { Outlet, NavLink } from "react-router";
-import { Clock, Settings, Play, Pause } from "lucide-react";
+import { Clock, Play, Pause } from "lucide-react";
 import { SlideOutProvider } from "./SlideOutContext";
 import SlideOutPanel from "./SlideOutPanel";
 import clsx from "clsx";
 import logoSvg from "../imports/svg-j3v6qd5w0g";
 import { useSimulation } from "../context/SimulationContext";
-import { useConfig } from "../context/ConfigContext";
 import {
   Popover,
   PopoverTrigger,
   PopoverContent,
 } from "./ui/popover";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from "./ui/dropdown-menu";
-import type { OperatingMode } from "../lib/types";
 
 /* ─── SVG Logo: Figma FaPlane vector ─── */
 function LogoIcon() {
@@ -30,15 +20,8 @@ function LogoIcon() {
   );
 }
 
-const MODE_LABELS: Record<OperatingMode, string> = {
-  balanced: "Balanced",
-  high_precision: "High Precision",
-  high_recall: "High Recall",
-};
-
 export default function DashboardLayout() {
   const sim = useSimulation();
-  const config = useConfig();
 
   // datetime-local expects "YYYY-MM-DDTHH:mm" in local time (no Z)
   const dtLocalValue = (() => {
@@ -153,37 +136,6 @@ export default function DashboardLayout() {
               </div>
             </div>
 
-            {/* Mode */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-300 transition-colors focus:outline-none">
-                  <Settings className="w-3.5 h-3.5" />
-                  <span>{MODE_LABELS[config.mode]}</span>
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="bg-[#0F0F11] border border-white/[0.08] text-zinc-200 min-w-[180px]"
-              >
-                <DropdownMenuLabel className="text-[9px] font-bold uppercase tracking-widest text-zinc-500">
-                  Operating Mode
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-white/[0.06]" />
-                {(Object.keys(MODE_LABELS) as OperatingMode[]).map((m) => (
-                  <DropdownMenuItem
-                    key={m}
-                    onClick={() => config.changeMode(m)}
-                    className={clsx(
-                      "text-[11px] font-bold uppercase tracking-widest cursor-pointer focus:bg-white/[0.06] focus:text-white",
-                      config.mode === m ? "text-[#00B4E2]" : "text-zinc-300"
-                    )}
-                  >
-                    {MODE_LABELS[m]}
-                    {config.mode === m && <span className="ml-auto text-[9px]">●</span>}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </header>
 
